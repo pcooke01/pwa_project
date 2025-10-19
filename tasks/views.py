@@ -16,6 +16,15 @@ class NewTaskForm(forms.Form):
             'placeholder': 'New Task'  
         })
     )
+    description = forms.CharField(
+        label='Description',
+        required=False,
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Optional description',
+            'rows': 3
+        })
+    )
+    completed = forms.BooleanField(required=False)
 
 # Index View - Home page showing task list
 def index(request):
@@ -31,7 +40,9 @@ def add(request):
         form = NewTaskForm(request.POST)
         if form.is_valid():
             task_name = form.cleaned_data["task"]
-            Task.objects.create(name=task_name)  # Create a new Task object and save it in the database
+            description = form.cleaned_data["description"]
+            completed = form.cleaned_data["completed"]
+            Task.objects.create(name=task_name,description=description, completed=completed)  # Create a new Task object and save it in the database
             return HttpResponseRedirect(reverse("tasks:index"))
         else:
             return render(request, "tasks/add.html", {
@@ -43,13 +54,13 @@ def add(request):
 
 # API View to Get a List of Tasks
 def get_tasks(request):
-    tasks = Task.objects.all().values("id", "name", "completed")  # Get all tasks from the database
+    tasks = Task.objects.all().values("id", "name", "description", "completed")  # Get all tasks from the database
     return JsonResponse(list(tasks), safe=False)  # Return tasks as JSON
 
 # API View to Get a Specific Task
 def get_task(request, id):
     task = get_object_or_404(Task, id=id)  # Fetch a specific task by ID or return a 404 if not found
-    return JsonResponse({"id": task.id, "name": task.name, "completed": task.completed})
+    return JsonResponse({"id": task.id, "name": task.name, "description": task.description, "completed": task.completed})
 
 # API View to Create a New Task
 @csrf_exempt  # To allow POST requests without CSRF protection for the sake of API
