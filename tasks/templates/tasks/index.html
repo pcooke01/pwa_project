@@ -4,7 +4,7 @@
    <ul>
        {% for task in tasks %}
             <li>
-                <strong>{{ task.name }}</strong> - {{ task.description}} - {{ task.completed }}
+                <strong>{{ task.name }}</strong> - {{ task.description}} - {{ task.due_date }} - {{ task.completed }} - {{ task.created_at }}
                 {% if task.completed %} ✅ {% else %} ❌ {% endif %}
             </li>
        {% empty %}
@@ -17,6 +17,7 @@
         <tr>
             <th>Task</th>
             <th>Description</th>
+            <th>Date Due</th>
             <th>Completed</th>
         </tr>
     </thead>
@@ -25,6 +26,7 @@
             <tr>
                 <td>{{ task.name }}</td>
                 <td>{{ task.description|default:"No description" }}</td>
+                <td>{{ task.due_date }}</td>
                 <td>
                     {% if task.completed %}
                         ✅
@@ -40,5 +42,62 @@
         {% endfor %}
     </tbody>
 </table>
+
+<h2>View task details</h2>
+<select id="taskDropdown">
+    <option value=""> -- Select a task --</option>
+    {% for task in tasks %}
+        <option value="{{ task.id }}">{{ task.name }}</option>
+    {% endfor %}
+</select>
+
+<!-- Initially hidden task details -->
+<div id="taskDetails" style="display: none;">
+    <p><strong>Task Name:</strong> <span id="taskName"></span></p>
+    <p><strong>Description:</strong> <span id="taskDescription"></span></p>
+    <p><strong>Due Date:</strong> <span id="taskDueDate"></span></p>
+    <p><strong>Completed:</strong> <span id="taskCompleted"></span></p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const taskDropdown = document.querySelector("#taskDropdown");
+    const taskDetails = document.querySelector("#taskDetails");
+
+    taskDropdown.addEventListener("change", (event) => {
+        const taskId = event.target.value;
+        
+        // Clear previous task details
+        document.querySelector("#taskName").textContent = "";
+        document.querySelector("#taskDescription").textContent = "";
+        document.querySelector("#taskDueDate").textContent = "";
+        document.querySelector("#taskCompleted").textContent = "";
+
+        if (taskId) {
+            // Show task details container
+            taskDetails.style.display = "block";
+
+            fetch(`/tasks/api/tasks/${taskId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Display task data in the HTML
+                    document.querySelector("#taskName").textContent = data.name;
+                    document.querySelector("#taskDescription").textContent = data.description;
+                    document.querySelector("#taskDueDate").textContent = new Date(data.due_date).toLocaleDateString(); // Format the date
+                    document.querySelector("#taskCompleted").textContent = data.completed ? "Yes" : "No";
+                })
+                .catch(error => {
+                    console.error('Error fetching task details:', error);
+                    taskDetails.innerHTML = "<p>Error loading task details.</p>";
+                });
+        } else {
+            // Hide task details if no task is selected
+            taskDetails.style.display = "none";
+        }
+    });
+});
+</script>
+
+
    <a href="{% url 'tasks:add' %}">Add a New Task</a>
 {% endblock %}
