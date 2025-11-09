@@ -4,7 +4,7 @@
    <ul>
        {% for task in tasks %}
             <li>
-                <strong>{{ task.name }}</strong> - {{ task.description}} - {{ task.due_date }} - {{ task.completed }} - {{ task.created_at }}
+                <strong>{{ task.}}</strong> - {{ task.description}} - {{ task.due_date }} - {{ task.completed }} - {{ task.created_at }}
                 {% if task.completed %} ✅ {% else %} ❌ {% endif %}
             </li>
        {% empty %}
@@ -138,6 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-
-   <a href="{% url 'tasks:add' %}">Add a New Task</a>
+<ul>
+   <li> <a href="{% url 'tasks:add' %}">Add a New Task</a> </li>
+   <li> <a href="{% url 'tasks:modify' %}">Modify a Task</a> </li>
+</ul>
 {% endblock %}
