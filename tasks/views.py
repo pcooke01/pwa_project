@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponseNotAllow
 from django.urls import reverse
 from .models import Task
 from django.views.decorators.csrf import csrf_exempt
+from .serializers import TaskSerializer
 import json
 
 # Form class for adding a new task
@@ -70,7 +71,7 @@ def create_task(request):
         task_name = data.get("task")
         if task_name:
             task = Task.objects.create(name=task_name)  # Create and save the new task in the database
-            return JsonResponse({"message": "Task added successfully", "task": {"id": task.id, "name": task.name}}, status=201)
+            return JsonResponse({"message": "Task added successfully", "task": {"id": task.id, "name": task.name, "description": task.description, "completed": task.completed}}, status=201)
         else:
             return JsonResponse({"error": "Task content not provided."}, status=400)
     return HttpResponseNotAllowed(["POST"])
